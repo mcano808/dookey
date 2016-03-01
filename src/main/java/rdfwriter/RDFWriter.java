@@ -7,12 +7,20 @@ import java.io.IOException;
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.IRI;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Model;
+import org.openrdf.model.Statement;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
+
+import info.aduna.iteration.Iterations;
 
 public class RDFWriter {
 
@@ -45,14 +53,23 @@ public class RDFWriter {
 		try{
 			String dataLine;
 			dataCsv = new BufferedReader(new FileReader("data.csv"));
+			String headers = dataCsv.readLine();
+			System.out.println("headers : " + headers);
 			while((dataLine = dataCsv.readLine()) != null){
-				System.out.println("Data line: " + dataLine);
+				//System.out.println("Data line: " + dataLine);
 				String splitOn = ",";
 				String[] data = dataLine.split(splitOn);
 				AisVesselEvent event = new AisVesselEvent(dataLine);
 				makeObservation(nameSpace, conn, f, event);				
 				//mmsi, timestamp, lat, lon, cog, sog, heading, navstat, imo, name, callsign, type,a-d, draught, destination, eta
 			}
+			
+			//check and make sure something went in
+			RepositoryResult<Statement> statements = conn.getStatements(null, null, null, true);
+			//Change Results to model so can print out easier.
+			Model model = Iterations.addAll(statements, new LinkedHashModel());
+			//Print out model using turtle format.
+			Rio.write(model, System.out, RDFFormat.TURTLE);
 		}catch(IOException e){
 			e.printStackTrace();
 		}finally{
@@ -71,11 +88,12 @@ public class RDFWriter {
 		
 	}
 	
-	private static void makeObservation ( String nameSpace, RepositoryConnection conn,ValueFactory f, AisVesselEvent event){
+	private static  void makeObservation ( String nameSpace, RepositoryConnection conn,ValueFactory f, AisVesselEvent event){
 		//Make the Uri
 		IRI subject = f.createIRI(nameSpace, event.getImo().toString());
 		
 		//Do the writing
+		//TODO should always have a type and label with it (is type vessel and label should be short name)
 		writeMMSI(conn, subject, event.getMmsi());
 		writeTimeStamp(conn, subject, event.getTime());
 		writeLatitude(conn, subject, event.getLatitude());
@@ -104,55 +122,55 @@ public class RDFWriter {
 	private static void writeTimeStamp(RepositoryConnection conn, IRI subject, Literal timestamp){
 		conn.add(subject, AISOnto.TIME, timestamp);
 	}
-	private static void writeLatitude(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeLatitude(RepositoryConnection conn, IRI subject, Literal latitude){
+		conn.add(subject, AISOnto.LAT, latitude);
 	}
-	private static void writeLongitude(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeLongitude(RepositoryConnection conn, IRI subject, Literal longitude){
+		conn.add(subject, AISOnto.LON, longitude);
 	}
-	private static void writeCOG(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeCOG(RepositoryConnection conn, IRI subject, Literal cog){
+		conn.add(subject, AISOnto.COG, cog);
 	}
-	private static void writeSOG(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeSOG(RepositoryConnection conn, IRI subject, Literal sog){
+		conn.add(subject, AISOnto.SOG, sog);
 	}
-	private static void writeHeading(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeHeading(RepositoryConnection conn, IRI subject, Literal heading){
+		conn.add(subject, AISOnto.HEADING, heading);
 	}
-	private static void writeNavstat(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeNavstat(RepositoryConnection conn, IRI subject, Literal navstat){
+		conn.add(subject, AISOnto.NAVSTAT, navstat);
 	}
-	private static void writeIMO(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeIMO(RepositoryConnection conn, IRI subject, Literal imo){
+		conn.add(subject, AISOnto.IMO, imo);
 	}
-	private static void writeName(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeName(RepositoryConnection conn, IRI subject, Literal name){
+		conn.add(subject, AISOnto.NAME, name);
 	}
-	private static void writeCallsign(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeCallsign(RepositoryConnection conn, IRI subject, Literal callsign){
+		conn.add(subject, AISOnto.CALLSIGN, callsign);
 	}
-	private static void writeType(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeType(RepositoryConnection conn, IRI subject, Literal type){
+		conn.add(subject, AISOnto.TYPE, type);
 	}
-	private static void writeA(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeA(RepositoryConnection conn, IRI subject, Literal a){
+		conn.add(subject, AISOnto.A, a);
 	}
-	private static void writeB(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeB(RepositoryConnection conn, IRI subject, Literal b){
+		conn.add(subject, AISOnto.B, b);
 	}
-	private static void writeC(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeC(RepositoryConnection conn, IRI subject, Literal c){
+		conn.add(subject, AISOnto.C, c);
 	}
-	private static void writeD(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeD(RepositoryConnection conn, IRI subject, Literal d){
+		conn.add(subject, AISOnto.D, d);
 	}
-	private static void writeDraught(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeDraught(RepositoryConnection conn, IRI subject, Literal draught){
+		conn.add(subject, AISOnto.DRAUGHT, draught);
 	}
-	private static void writeDestination(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeDestination(RepositoryConnection conn, IRI subject, Literal destination){
+		conn.add(subject, AISOnto.DESTINATION, destination);
 	}
-	private static void writeETA(RepositoryConnection conn, IRI subject, Literal timestamp){
-		
+	private static void writeETA(RepositoryConnection conn, IRI subject, Literal eta){
+		conn.add(subject, AISOnto.ETA, eta);
 	}
 }

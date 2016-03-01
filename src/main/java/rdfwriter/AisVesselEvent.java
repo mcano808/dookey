@@ -41,13 +41,13 @@ public class AisVesselEvent {
 			//If length = 20 we have a destination that had a city,Country value.
 			if(data.length == 20){
 				//set destination equal to 17 + 18 
-				destination = factory.createLiteral((data[16] + ", " + data[17]), XMLSchema.STRING);
-				eta = factory.createLiteral(data [18], XMLSchema.STRING);
+				destination = factory.createLiteral((data[17] + ", " + data[18]), XMLSchema.STRING);
+				eta = factory.createLiteral(data [19], XMLSchema.STRING);
 
 			}else{
 				//set destination regular.
-				destination = factory.createLiteral(data[16], XMLSchema.STRING);
-				eta = factory.createLiteral(data[17], XMLSchema.STRING);
+				destination = factory.createLiteral(data[17], XMLSchema.STRING);
+				eta = factory.createLiteral(data[18], XMLSchema.STRING);
 			}
 			//Set all the other attributes
 			mmsi = factory.createLiteral(data[0], XMLSchema.STRING);
@@ -57,15 +57,16 @@ public class AisVesselEvent {
 			cog = factory.createLiteral(data[4], XMLSchema.STRING);
 			sog = factory.createLiteral(data[5], XMLSchema.STRING);
 			heading = factory.createLiteral(data[6], XMLSchema.STRING);
-			imo = factory.createLiteral(data[7], XMLSchema.STRING);
-			name = factory.createLiteral(data[8], XMLSchema.STRING);
-			callsign = factory.createLiteral(data[9], XMLSchema.STRING);
-			type = factory.createLiteral(data[10], XMLSchema.STRING);
-			a = factory.createLiteral(data[11], XMLSchema.STRING);
-			b = factory.createLiteral(data[12], XMLSchema.STRING);
-			c = factory.createLiteral(data[13], XMLSchema.STRING);
-			d = factory.createLiteral(data[14], XMLSchema.STRING);
-			draught = factory.createLiteral(data[15], XMLSchema.STRING);
+			navstat = factory.createLiteral(data[7], XMLSchema.STRING);
+			imo = factory.createLiteral(data[8], XMLSchema.STRING);
+			name = factory.createLiteral(data[9], XMLSchema.STRING);
+			callsign = factory.createLiteral(data[10], XMLSchema.STRING);
+			type = factory.createLiteral(data[11], XMLSchema.STRING);
+			a = factory.createLiteral(data[12], XMLSchema.STRING);
+			b = factory.createLiteral(data[13], XMLSchema.STRING);
+			c = factory.createLiteral(data[14], XMLSchema.STRING);
+			d = factory.createLiteral(data[15], XMLSchema.STRING);
+			draught = factory.createLiteral(data[16], XMLSchema.STRING);
 
 		}
 			
