@@ -1,6 +1,8 @@
 package rdfwriter;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -17,6 +19,7 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
 
@@ -63,13 +66,20 @@ public class RDFWriter {
 				makeObservation(nameSpace, conn, f, event);				
 				//mmsi, timestamp, lat, lon, cog, sog, heading, navstat, imo, name, callsign, type,a-d, draught, destination, eta
 			}
-			
-			//check and make sure something went in
+			//Get everything from the local store.
 			RepositoryResult<Statement> statements = conn.getStatements(null, null, null, true);
 			//Change Results to model so can print out easier.
 			Model model = Iterations.addAll(statements, new LinkedHashModel());
+			//Print out to document
+			try{
+				writeDocument(model);
+			}catch(FileNotFoundException e){
+				System.out.println("Problem with writing file");
+				e.printStackTrace();
+			}
 			//Print out model using turtle format.
-			Rio.write(model, System.out, RDFFormat.TURTLE);
+			//Rio.write(model, System.out, RDFFormat.TURTLE);
+			System.out.println("Done writing file");
 		}catch(IOException e){
 			e.printStackTrace();
 		}finally{
@@ -87,11 +97,29 @@ public class RDFWriter {
 		
 		
 	}
-	
+	// @param {Model} statements The RDF statements in a model that are to be written to file.
+	private static void writeDocument (Model statements) throws FileNotFoundException{
+		//TODO we will need to parse the date so we can build out the path in format YYYY/MMM/DD/filename.rdf
+		FileOutputStream out = new FileOutputStream("output.rdf");
+		org.openrdf.rio.RDFWriter writer = Rio.createWriter(RDFFormat.RDFXML, out);
+		try{
+			//Start the writer
+			writer.startRDF();
+			//Loop through and write each statement
+			for (Statement st: statements){
+				writer.handleStatement(st);
+			}
+			//Close writer
+			writer.endRDF();
+		}catch(RDFHandlerException e){
+			e.printStackTrace();
+		}
+	}
 	private static  void makeObservation ( String nameSpace, RepositoryConnection conn,ValueFactory f, AisVesselEvent event){
 		//Make the Uri
 		IRI subject = f.createIRI(nameSpace, event.getImo().toString());
-		
+		//TODO We should just add statements to a local model for use in the writer later instead
+		//of writing to local storage and retrieving later.
 		//Do the writing
 		//TODO should always have a type and label with it (is type vessel and label should be short name)
 		writeMMSI(conn, subject, event.getMmsi());
