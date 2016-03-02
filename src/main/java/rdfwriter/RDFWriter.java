@@ -5,6 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.DateFormatSymbols;
+import java.util.Calendar;
 
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.IRI;
@@ -60,8 +64,6 @@ public class RDFWriter {
 			System.out.println("headers : " + headers);
 			while((dataLine = dataCsv.readLine()) != null){
 				//System.out.println("Data line: " + dataLine);
-				String splitOn = ",";
-				String[] data = dataLine.split(splitOn);
 				AisVesselEvent event = new AisVesselEvent(dataLine);
 				makeObservation(nameSpace, conn, f, event);				
 				//mmsi, timestamp, lat, lon, cog, sog, heading, navstat, imo, name, callsign, type,a-d, draught, destination, eta
@@ -97,11 +99,40 @@ public class RDFWriter {
 		
 		
 	}
+	private static String makePath (){
+		Calendar cal = Calendar.getInstance();
+		String fileBase = "dataOut/";
+		String filePath = null;
+		Integer year;
+		Integer month;
+		String monthStr;
+		Integer day_of_month;
+		
+		//Get a date set up so we can set the path based on YYYY/MMM/DD/filename.rdf
+		year = cal.get(Calendar.YEAR);
+		month = cal.get(Calendar.MONTH);
+		monthStr = new DateFormatSymbols().getShortMonths()[month];
+		day_of_month = cal.get(Calendar.DAY_OF_MONTH);
+		
+		filePath = year + "/" + monthStr + "/" + day_of_month + "/";
+		//create the file patch
+		try {
+			Files.createDirectories(Paths.get(fileBase + filePath));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Problem making the file path");
+			e.printStackTrace();
+		}
+		return fileBase + filePath;
+	}
 	// @param {Model} statements The RDF statements in a model that are to be written to file.
 	private static void writeDocument (Model statements) throws FileNotFoundException{
-		//TODO we will need to parse the date so we can build out the path in format YYYY/MMM/DD/filename.rdf
-		FileOutputStream out = new FileOutputStream("output.rdf");
+		
+		String fileName ="output.rdf";
+		
+		FileOutputStream out = new FileOutputStream(makePath() + fileName);
 		org.openrdf.rio.RDFWriter writer = Rio.createWriter(RDFFormat.RDFXML, out);
+
 		try{
 			//Start the writer
 			writer.startRDF();
